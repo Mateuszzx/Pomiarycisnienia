@@ -1,10 +1,11 @@
 #include <HoneywellTruStabilitySPI.h>
-
 #include <FlexCAN_T4.h>
 #include <isotp.h>
-#include <HoneywellTruStabilitySPI.h>
+
+
 float x = 0;
 int y;
+
 #define SLAVE_SELECT_PIN SS
 TruStabilityPressureSensor sensor( SLAVE_SELECT_PIN, -15.0, 15.0 );
 isotp<RX_BANKS_16, 512> tp; /* 16 slots for multi-ID support, at 512bytes buffer each payload rebuild */
@@ -51,8 +52,9 @@ void setup() {
   Serial.begin(115200); delay(400);
   Can1.begin();
   Can1.setClock(CLK_60MHz);
-  Can1.setBaudRate(95238);
+  Can1.setBaudRate(1000000);
   Can1.setMaxMB(16);
+  CAN1.setMB(1)
   Can1.enableFIFO();
   Can1.enableFIFOInterrupt();
   //  Can1.onReceive(canSniff);
@@ -64,6 +66,7 @@ void setup() {
 }
 
 void loop() {
+  
   y = Serial.read();
   if(y==5){
     measure();

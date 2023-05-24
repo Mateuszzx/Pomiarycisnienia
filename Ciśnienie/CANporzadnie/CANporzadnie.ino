@@ -1,7 +1,10 @@
 #include <FlexCAN_T4.h>
+#include <isotp.h>
 
 FlexCAN_T4<CAN3, RX_SIZE_256, TX_SIZE_16> myCan;  //bieda edition
 //FlexCAN_T4FD<CAN3, RX_SIZE_256, TX_SIZE_16> myFD;     //tylko porty na CAN 3 wspierają tą wersję
+CAN_message_t msg1;
+CAN_message_t msg2;
 
 void canSniff(const CAN_message_t &msg) {
   Serial.print("MB "); Serial.print(msg.mb);
@@ -16,6 +19,17 @@ void canSniff(const CAN_message_t &msg) {
   } Serial.println();
 }
 
+void myCallback(const ISOTP_data &config, const uint8_t *buf) {
+  Serial.print("ID: ");
+  Serial.print(config.id, HEX);
+  Serial.print("\tLEN: ");
+  Serial.print(config.len);
+  Serial.print("\tFINAL ARRAY: ");
+  for ( int i = 0; i < config.len; i++ ) {
+    Serial.print(buf[i], HEX);
+    Serial.print(" ");
+  } Serial.println();
+}
 
 void setup() {
   Serial.begin(115200);
@@ -23,6 +37,8 @@ void setup() {
 
   myCan.begin();
   myCan.setBaudRate(1000000);         //dla CAN2.0
+  myCan.enableFIFO();
+  myCan.enableFIFOInterrupt();
   /*      Dla CANFD
   CANFD_timings_t config;
   config.clock = CLK_24MHz;
@@ -42,6 +58,9 @@ void setup() {
   myCan.mailboxStatus();  // to get an idea of a default initialization of the mailboxes
   delay(200);
   
+  msg1.id=0x3;
+  msg1.mb =0x1;
+
 
   // Ustawienie RX i TX: myCan.setRX(ALT); or myCAN.setTX(ALT)
 
@@ -66,10 +85,10 @@ with a truncated payload to max 8 bytes.
 
 
 */
+
 String x;
 uint8_t star;
 uint8_t i;
-
 void loop() {
   myCan.events();
   star = 0;
@@ -81,9 +100,18 @@ void loop() {
       x.toInt();
       if(x==1){
         Serial.println("Siema");
-        //myCan.write(myFrame); 
+        myCan.write(msg1);
+        canSniff(msg1);
         // Write to any available transmit mailbox, Note, sequential frames must use this function only.
         star=1;
+        static uint32_t timeout = millis();
+        if ( millis() - timeout < 200 ) {
+            CAN_message_t msg;
+            msg.id = random(0x1,0x7FE);
+            for ( uint8_t i = 0; i < 8; i++ ) msg.buf[i] = i + 1;
+            myCan.write(msg);
+            
+  }
         delay(1000);    
       }
       else if(x==2){
@@ -93,9 +121,6 @@ void loop() {
       else{
       }
       delay(500);
-    
-    
-
   }
   
 
