@@ -1,5 +1,6 @@
 #include <FlexCAN_T4.h>
-
+#include <isotp.h>
+isotp<RX_BANKS_16, 512> tp; /* 16 slots for multi-ID support, at 512bytes buffer each payload rebuild */
 
 FlexCAN_T4<CAN3, RX_SIZE_256, TX_SIZE_16> myCan;  //bieda edition
 //FlexCAN_T4FD<CAN3, RX_SIZE_256, TX_SIZE_16> myFD;     //tylko porty na CAN 3 wspierają tą wersję
@@ -27,65 +28,30 @@ void setup() {
 
   myCan.begin();
   myCan.setBaudRate(1000000);         //dla CAN2.0
-  //myCan.enableFIFO();
-  //myCan.enableFIFOInterrupt();
-  /*      Dla CANFD
-  CANFD_timings_t config;
-  config.clock = CLK_24MHz;
-  config.baudrate = 1000000;  
-  config.baudrateFD = 2000000;
-  config.propdelay = 190;
-  config.bus_length = 1;
-  config.sample = 70;
-  FD.setBaudRate(config);
-  */
-  
-  myCan.onReceive(canSniff); 
-  // allows all FIFO/message box messages to be received in the supplied callback.
-  // obsluga przerwania
-
+  myCan.setMaxMB(16);
   myCan.enableFIFO();
-  myCan.enableMBInterrupt(FIFO);
-  myCan.enableMBInterrupts(); // enables all mailboxes to be interrupt enabled
- 
- 
+  myCan.enableFIFOInterrupt();
+  myCan.onReceive(canSniff); 
+  myCan.mailboxStatus();
+
   delay(200);
   
   msg1.id=0x0;
 
-
-
   // Ustawienie RX i TX: myCan.setRX(ALT); or myCAN.setTX(ALT)
-
 }
 
-/*
-There are 2 different message structures for CAN2.0 and CANFD.
-
-CANFD: CANFD_message_t
-
-CAN2.0: CAN_message_t
-
-Both are very similar, except CANFD structure has a 64 byte payload, edl, and brs switching.
-
-brs by default is set to 1, unless changed in the message structure.
-This bit, when set, allows the higher bitrate for data to be used in CANFD mode,
-otherwise nominal rate is used.
-
-edl by default is set to 1, unless changed in the message structure.
-This bit, when set, allows CANFD frames to be sent, otherwise, sends as a CAN2.0 frame,
-with a truncated payload to max 8 bytes.
-
-
-*/
 
 String x;
 uint8_t star;
 uint8_t i;
+
 void loop() {
   myCan.events();
+
   star = 0;
   x="";
+
   Serial.println("wpisz coś");
   while(star==0){                           //Inicjalizacja procesu   
   
@@ -103,6 +69,7 @@ void loop() {
             msg.id = random(0x1,0x7FE);
             for ( uint8_t i = 0; i < 8; i++ ) msg.buf[i] = i + 1;
             myCan.write(msg);
+            
             
   }
         delay(1000);    

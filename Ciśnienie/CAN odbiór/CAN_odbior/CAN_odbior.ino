@@ -38,30 +38,17 @@ void measure(){
   }
 }
 void setup() {
-   Serial.begin(115200);
+  Serial.begin(115200);
   delay(400);
 
   myCan.begin();
   myCan.setBaudRate(1000000);         //dla CAN2.0
-  //myCan.enableFIFO();
-  //myCan.enableFIFOInterrupt();
-  /*      Dla CANFD
-  CANFD_timings_t config;
-  config.clock = CLK_24MHz;
-  config.baudrate = 1000000;  
-  config.baudrateFD = 2000000;
-  config.propdelay = 190;
-  config.bus_length = 1;
-  config.sample = 70;
-  FD.setBaudRate(config);
-  */
-  
+  myCan.setMaxMB(16);
+  myCan.enableFIFO();
+  myCan.enableFIFOInterrupt();
   myCan.onReceive(canSniff); 
-  // allows all FIFO/message box messages to be received in the supplied callback.
-  
-  myCan.enableMBInterrupts(); // enables all mailboxes to be interrupt enabled
-  myCan.setMaxMB(5); //stawienie liczby odbiorców
-  //myCan.mailboxStatus();  // to get an idea of a default initialization of the mailboxes
+  myCan.mailboxStatus();
+ 
   delay(200);
   
   //tp.begin();
