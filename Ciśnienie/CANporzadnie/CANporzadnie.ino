@@ -37,8 +37,8 @@ void setup() {
 
   myCan.begin();
   myCan.setBaudRate(1000000);         //dla CAN2.0
-  myCan.enableFIFO();
-  myCan.enableFIFOInterrupt();
+  //myCan.enableFIFO();
+  //myCan.enableFIFOInterrupt();
   /*      Dla CANFD
   CANFD_timings_t config;
   config.clock = CLK_24MHz;
@@ -107,6 +107,7 @@ void loop() {
         static uint32_t timeout = millis();
         if ( millis() - timeout < 200 ) {
             CAN_message_t msg;
+            msg.id =1;
             msg.id = random(0x1,0x7FE);
             for ( uint8_t i = 0; i < 8; i++ ) msg.buf[i] = i + 1;
             myCan.write(msg);

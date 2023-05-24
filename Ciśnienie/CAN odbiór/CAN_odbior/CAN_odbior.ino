@@ -53,14 +53,14 @@ void setup() {
   Can1.begin();
   Can1.setClock(CLK_60MHz);
   Can1.setBaudRate(1000000);
-  Can1.setMaxMB(16);
+  Can1.setMaxMB(5);
   Can1.setMB(MB1,RX);
-  Can1.enableFIFO();
-  Can1.enableFIFOInterrupt();
-  //  Can1.onReceive(canSniff);
-  tp.begin();
-  tp.setWriteBus(&Can1); /* we write to this bus */
-  tp.onReceive(myCallback); /* set callback */
+  //Can1.enableFIFO();
+  //Can1.enableFIFOInterrupt();
+  Can1.onReceive(canSniff);
+  //tp.begin();
+  //tp.setWriteBus(&Can1); /* we write to this bus */
+  //tp.onReceive(myCallback); /* set callback */
   SPI.begin(); // start SPI communication
   sensor.begin(); // run sensor initialization
 }
