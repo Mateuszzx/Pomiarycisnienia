@@ -54,7 +54,7 @@ void setup() {
   Can1.setClock(CLK_60MHz);
   Can1.setBaudRate(1000000);
   Can1.setMaxMB(16);
-  CAN1.setMB(1)
+  Can1.setMB(MB1,RX);
   Can1.enableFIFO();
   Can1.enableFIFOInterrupt();
   //  Can1.onReceive(canSniff);
