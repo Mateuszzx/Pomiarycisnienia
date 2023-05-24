@@ -76,24 +76,30 @@ void loop() {
   x="";
   Serial.println("wpisz coś");
   while(star==0){                           //Inicjalizacja procesu   
-    if (Serial.available() > 0) {
-      x = Serial.readString();
-    }
-    if(x=="start"){
-      Serial.println("Siema");
-      //myCan.write(myFrame); 
-      // Write to any available transmit mailbox, Note, sequential frames must use this function only.
-      star=1;    
-    }
-    else if(x=="stop"){
-      Serial.println("stop");
-      star=2;
-    }
-    else{
-    }
-    delay(500);
-  }
+  
+      x = Serial.read();
+      x.toInt();
+      if(x==1){
+        Serial.println("Siema");
+        //myCan.write(myFrame); 
+        // Write to any available transmit mailbox, Note, sequential frames must use this function only.
+        star=1;
+        delay(1000);    
+      }
+      else if(x==2){
+        Serial.println("stop");
+        star=2;
+      }
+      else{
+      }
+      delay(500);
+    
+    
 
+  }
+  
+
+  
   if(star==1){
     i = 0;
     while(i<3){
@@ -104,6 +110,6 @@ void loop() {
     }
   }
   else{ 
-    delay(100);
+    delay(1000);
   }
 }
