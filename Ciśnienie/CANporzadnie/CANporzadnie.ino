@@ -42,10 +42,13 @@ void setup() {
   
   myCan.onReceive(canSniff); 
   // allows all FIFO/message box messages to be received in the supplied callback.
-  
+  // obsluga przerwania
+
+  myCan.enableFIFO();
+  myCan.enableMBInterrupt(FIFO);
   myCan.enableMBInterrupts(); // enables all mailboxes to be interrupt enabled
-  myCan.setMaxMB(5); //stawienie liczby odbiorców
-  myCan.mailboxStatus();  // to get an idea of a default initialization of the mailboxes
+ 
+ 
   delay(200);
   
   msg1.id=0x3;
@@ -91,8 +94,7 @@ void loop() {
       if(x==1){
         Serial.println("Siema");
         myCan.write(msg1);
-        canSniff(msg1);
-        // Write to any available transmit mailbox, Note, sequential frames must use this function only.
+        
         star=1;
         static uint32_t timeout = millis();
         if ( millis() - timeout < 200 ) {

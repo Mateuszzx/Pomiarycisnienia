@@ -9,7 +9,7 @@ int y;
 #define SLAVE_SELECT_PIN SS
 TruStabilityPressureSensor sensor( SLAVE_SELECT_PIN, -15.0, 15.0 );
 
-FlexCAN_T4<CAN1, RX_SIZE_256, TX_SIZE_16> Can1;
+FlexCAN_T4<CAN1, RX_SIZE_256, TX_SIZE_16> myCan;
 
 
 
@@ -38,16 +38,32 @@ void measure(){
   }
 }
 void setup() {
-  Serial.begin(115200); delay(400);
-  Can1.begin();
-  Can1.setClock(CLK_60MHz);
-  Can1.setBaudRate(1000000);
-  Can1.setMaxMB(5);
-  Can1.setMB(MB1,RX);
-  //Can1.enableFIFO();
-  //Can1.enableFIFOInterrupt();
-  Can1.onReceive(canSniff);
-  Can1.mailboxStatus();
+   Serial.begin(115200);
+  delay(400);
+
+  myCan.begin();
+  myCan.setBaudRate(1000000);         //dla CAN2.0
+  //myCan.enableFIFO();
+  //myCan.enableFIFOInterrupt();
+  /*      Dla CANFD
+  CANFD_timings_t config;
+  config.clock = CLK_24MHz;
+  config.baudrate = 1000000;  
+  config.baudrateFD = 2000000;
+  config.propdelay = 190;
+  config.bus_length = 1;
+  config.sample = 70;
+  FD.setBaudRate(config);
+  */
+  
+  myCan.onReceive(canSniff); 
+  // allows all FIFO/message box messages to be received in the supplied callback.
+  
+  myCan.enableMBInterrupts(); // enables all mailboxes to be interrupt enabled
+  myCan.setMaxMB(5); //stawienie liczby odbiorców
+  myCan.mailboxStatus();  // to get an idea of a default initialization of the mailboxes
+  delay(200);
+  
   //tp.begin();
   //tp.setWriteBus(&Can1); /* we write to this bus */
   //tp.onReceive(myCallback); /* set callback */
@@ -56,7 +72,7 @@ void setup() {
 }
 
 void loop() {
-  Can1.events();
+  myCan.events();
   y = Serial.read();
   if(y==5){
     measure();
