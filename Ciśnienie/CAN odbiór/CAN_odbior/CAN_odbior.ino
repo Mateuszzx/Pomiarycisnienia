@@ -61,7 +61,7 @@ void setup() {
   
   myCan.enableMBInterrupts(); // enables all mailboxes to be interrupt enabled
   myCan.setMaxMB(5); //stawienie liczby odbiorców
-  myCan.mailboxStatus();  // to get an idea of a default initialization of the mailboxes
+  //myCan.mailboxStatus();  // to get an idea of a default initialization of the mailboxes
   delay(200);
   
   //tp.begin();

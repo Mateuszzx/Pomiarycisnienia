@@ -51,8 +51,8 @@ void setup() {
  
   delay(200);
   
-  msg1.id=0x3;
-  msg1.mb =0x1;
+  msg1.id=0x0;
+
 
 
   // Ustawienie RX i TX: myCan.setRX(ALT); or myCAN.setTX(ALT)
