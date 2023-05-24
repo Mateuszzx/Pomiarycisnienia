@@ -25,7 +25,7 @@ void loop() {
   // the sensor returns 0 when new data is ready
   if( sensor.readSensor() == 0 ) {
     x = sensor.pressure();
-    x=x-1.46;
+    x=x-1.45;
     x=x*0.702829;
     Serial.print("Pomiar ciśnienia w mH2O ");
     Serial.println(x);

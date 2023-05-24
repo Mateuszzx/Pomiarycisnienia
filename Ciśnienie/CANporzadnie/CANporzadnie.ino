@@ -1,18 +1,21 @@
 #include <FlexCAN_T4.h>
-#include <isotp.h>
-isotp<RX_BANKS_16, 512> tp; /* 16 slots for multi-ID support, at 512bytes buffer each payload rebuild */
 
-FlexCAN_T4<CAN3, RX_SIZE_256, TX_SIZE_16> myCan;  //bieda edition
-//FlexCAN_T4FD<CAN3, RX_SIZE_256, TX_SIZE_16> myFD;     //tylko porty na CAN 3 wspierają tą wersję
-CAN_message_t msg1;
-CAN_message_t msg2;
+#include <FlexCAN_T4.h>
+FlexCAN_T4<CAN1, RX_SIZE_256, TX_SIZE_16> Can0;
+
+void setup(void) {
+  Serial.begin(115200); delay(400);
+  pinMode(6, OUTPUT); digitalWrite(6, LOW); /* optional tranceiver enable pin */
+  Can0.begin();
+  Can0.setBaudRate(1000000);
+  Can0.setMaxMB(16);
+  Can0.enableFIFO();
+  Can0.enableFIFOInterrupt();
+  Can0.onReceive(canSniff);
+  Can0.mailboxStatus();
+}
 
 void canSniff(const CAN_message_t &msg) {
-  Serial.print("MB "); Serial.print(msg.mb);
-  Serial.print("  OVERRUN: "); Serial.print(msg.flags.overrun);
-  Serial.print("  LEN: "); Serial.print(msg.len);
-  Serial.print(" EXT: "); Serial.print(msg.flags.extended);
-  Serial.print(" TS: "); Serial.print(msg.timestamp);
   Serial.print(" ID: "); Serial.print(msg.id, HEX);
   Serial.print(" Buffer: ");
   for ( uint8_t i = 0; i < msg.len; i++ ) {
@@ -22,32 +25,12 @@ void canSniff(const CAN_message_t &msg) {
 
 
 
-void setup() {
-  Serial.begin(115200);
-  delay(400);
-
-  myCan.begin();
-  myCan.setBaudRate(1000000);         //dla CAN2.0
-  myCan.setMaxMB(16);
-  myCan.enableFIFO();
-  myCan.enableFIFOInterrupt();
-  myCan.onReceive(canSniff); 
-  myCan.mailboxStatus();
-
-  delay(200);
-  
-  msg1.id=0x0;
-
-  // Ustawienie RX i TX: myCan.setRX(ALT); or myCAN.setTX(ALT)
-}
-
-
 String x;
 uint8_t star;
 uint8_t i;
 
 void loop() {
-  myCan.events();
+ Can0.events();
 
   star = 0;
   x="";
@@ -59,19 +42,18 @@ void loop() {
       x.toInt();
       if(x==1){
         Serial.println("Siema");
-        myCan.write(msg1);
+       
+        
         
         star=1;
-        static uint32_t timeout = millis();
-        if ( millis() - timeout < 200 ) {
-            CAN_message_t msg;
-            msg.id =1;
-            msg.id = random(0x1,0x7FE);
-            for ( uint8_t i = 0; i < 8; i++ ) msg.buf[i] = i + 1;
-            myCan.write(msg);
+  
+        CAN_message_t msg;
+        msg.id =1;
+        for ( uint8_t i = 0; i < 8; i++ ) msg.buf[i] = 1;
+        Can0.write(msg);
             
             
-  }
+  
         delay(1000);    
       }
       else if(x==2){
@@ -89,8 +71,10 @@ void loop() {
     i = 0;
     while(i<3){
       Serial.println("dawaj hajs urządzenie");
-      //myCan.write(MB15, myFrame); 
-      // Write to mailbox 15 (provided it's a transmit mailbox)
+      CAN_message_t msg1;
+      msg1.id =1;
+      for (uint8_t z = 0; z < 8; z++ ) msg1.buf[z] = i+2;
+      Can0.write(msg1);
       i=i+1;
     }
   }

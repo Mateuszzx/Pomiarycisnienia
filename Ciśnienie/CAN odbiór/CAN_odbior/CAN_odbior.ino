@@ -48,6 +48,7 @@ void setup() {
   myCan.enableFIFOInterrupt();
   myCan.onReceive(canSniff); 
   myCan.mailboxStatus();
+  
  
   delay(200);
   
@@ -60,6 +61,7 @@ void setup() {
 
 void loop() {
   myCan.events();
+  
   y = Serial.read();
   if(y==5){
     measure();
