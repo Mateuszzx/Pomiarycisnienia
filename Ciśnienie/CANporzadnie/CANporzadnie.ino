@@ -35,29 +35,23 @@ void loop() {
   star = 0;
   x="";
 
-  Serial.println("wpisz coś");
+  Serial.println("Wpisz 1 aby rozpocząć pomiar, lub 2 by pobrać nowe dane");
   while(star==0){                           //Inicjalizacja procesu   
   
       x = Serial.read();
       x.toInt();
+
       if(x==1){
-        Serial.println("Siema");
-       
-        
-        
+        Serial.println("Rozpoczynam wykonanie pomiaru");
         star=1;
-  
         CAN_message_t msg;
         msg.id =1;
         for ( uint8_t i = 0; i < 8; i++ ) msg.buf[i] = 1;
         Can0.write(msg);
-            
-            
-  
         delay(1000);    
       }
       else if(x==2){
-        Serial.println("stop");
+        Serial.println("Wysyłam prośbę o wyniki pomiaru");
         star=2;
       }
       else{
@@ -65,20 +59,21 @@ void loop() {
       delay(500);
   }
   
-
-  
-  if(star==1){
+  if(star==2){
     i = 0;
     while(i<3){
-      Serial.println("dawaj hajs urządzenie");
+      
       CAN_message_t msg1;
       msg1.id =1;
-      for (uint8_t z = 0; z < 8; z++ ) msg1.buf[z] = i+2;
+      for (uint8_t z = 0; z < 8; z++ ){
+        msg1.buf[z] = i+2; 
+      }
       Can0.write(msg1);
       i=i+1;
+      delay(1000);
     }
   }
-  else{ 
+  else{
     delay(1000);
   }
 }
