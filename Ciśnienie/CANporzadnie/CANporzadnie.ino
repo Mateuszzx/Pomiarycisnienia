@@ -1,5 +1,5 @@
 #include <FlexCAN_T4.h>
-#include <isotp.h>
+
 
 FlexCAN_T4<CAN3, RX_SIZE_256, TX_SIZE_16> myCan;  //bieda edition
 //FlexCAN_T4FD<CAN3, RX_SIZE_256, TX_SIZE_16> myFD;     //tylko porty na CAN 3 wspierają tą wersję
@@ -19,17 +19,7 @@ void canSniff(const CAN_message_t &msg) {
   } Serial.println();
 }
 
-void myCallback(const ISOTP_data &config, const uint8_t *buf) {
-  Serial.print("ID: ");
-  Serial.print(config.id, HEX);
-  Serial.print("\tLEN: ");
-  Serial.print(config.len);
-  Serial.print("\tFINAL ARRAY: ");
-  for ( int i = 0; i < config.len; i++ ) {
-    Serial.print(buf[i], HEX);
-    Serial.print(" ");
-  } Serial.println();
-}
+
 
 void setup() {
   Serial.begin(115200);
