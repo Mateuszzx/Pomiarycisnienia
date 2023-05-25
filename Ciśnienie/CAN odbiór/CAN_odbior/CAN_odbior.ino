@@ -4,7 +4,18 @@
 FlexCAN_T4<CAN1, RX_SIZE_256, TX_SIZE_16> Can0;
 
 uint8_t odbior;
-float x = 0; //wartość ciśnienia
+float x = 0;
+int y;
+uint32_t teta;
+//int i=0;
+int tab;
+int pomiary;
+
+
+struct dp{
+  uint32_t teta;
+  int32_t x;
+};
 
 
 #define SLAVE_SELECT_PIN SS
@@ -33,7 +44,7 @@ void canSniff(const CAN_message_t &msg) {
   
 }
 
-
+/*
 void measure(){
   if( sensor.readSensor() == 0 ) {
     x = sensor.pressure();
@@ -43,13 +54,16 @@ void measure(){
     Serial.println(x);
   }
 }
+*/
 
-void sending(uint pomiary){
-  float p;
+void sending(){
+  dp pomiary[41]={};
+  uint32_t p;
   uint32_t timing;
+  tab = pomiary;
   for(uint8_t i =0; i<=40; i++){
-    pomiary[i].x = p;
-    pomiary[i].teta = timing;
+    p = pomiary[i].x;
+    timing = pomiary[i].teta;
     uint8_t pressure_count[4];
     uint8_t timing_count[4];
     for(uint8_t i=0; i<4; i++){
@@ -72,11 +86,23 @@ void loop() {
   Can0.events();
 
   if(odbior==0){
-    measure();
-    Serial.println("Wykonałem pomiary");
+    dp tab[41]={};
+    for(uint8_t i=0;i<=40;i++){
+      teta = micros();
+      tab[i].teta=teta;
+        if( sensor.readSensor() == 0 ) {
+          x = sensor.pressure();
+          
+          tab[i].x=x;}
+      Serial.println(tab[i].teta);
+      Serial.println(tab[i].x);  
+      delay(10);}
+      Serial.println("Wykonałem pomiary");
   }
+
   else if(odbior==2){
     Serial.println("Wysyłam");
+    sending();
   }
   else{
 
