@@ -65,7 +65,7 @@ void loop() {
   if(star==2){
     i = 0;
     while(i<3){
-      
+      for(uint8_t j = 0;j<=40;j++){
       CAN_message_t msg1;
       msg1.id =1;
       for (uint8_t z = 0; z < 8; z++ ){
@@ -73,6 +73,7 @@ void loop() {
       }
       Can0.write(msg1);
       i=i+1;
+    }
       delay(1000);
     }
   }
