@@ -19,6 +19,11 @@ void canSniff(const CAN_message_t &msg) {
   for ( uint8_t i = 0; i < msg.len; i++ ) {
     Serial.print(msg.buf[i], HEX); Serial.print(" ");
   } Serial.println();
+  CAN_message_t msg2;
+  msg2.id =1;
+  for ( uint8_t i = 0; i < 8; i++ ) msg2.buf[i] = 8;
+  Can0.write(msg2);
+
 }
 
 
