@@ -1,16 +1,34 @@
 #include <FlexCAN_T4.h>
+#include <isotp.h>
+isotp<RX_BANKS_16, 512> tp; /* 16 slots for multi-ID support, at 512bytes buffer each payload rebuild */
 FlexCAN_T4<CAN1, RX_SIZE_256, TX_SIZE_16> Can0;
 
 void setup(void) {
   Serial.begin(115200); delay(400);
   pinMode(6, OUTPUT); digitalWrite(6, LOW); /* optional tranceiver enable pin */
   Can0.begin();
+  Can1.setClock(CLK_60MHz);
   Can0.setBaudRate(1000000);
   Can0.setMaxMB(16);
   Can0.enableFIFO();
   Can0.enableFIFOInterrupt();
   Can0.onReceive(canSniff);
   Can0.mailboxStatus();
+  tp.begin();
+  tp.setWriteBus(&Can0); /* we write to this bus */
+  tp.onReceive(myCallback); /* set callback */
+}
+
+void myCallback(const ISOTP_data &config, const uint8_t *buf) {
+  Serial.print("ID: ");
+  Serial.print(config.id, HEX);
+  Serial.print("\tLEN: ");
+  Serial.print(config.len);
+  Serial.print("\tFINAL ARRAY: ");
+  for ( int i = 0; i < config.len; i++ ) {
+    Serial.print(buf[i], HEX);
+    Serial.print(" ");
+  } Serial.println();
 }
 
 void canSniff(const CAN_message_t &msg) {
@@ -19,10 +37,11 @@ void canSniff(const CAN_message_t &msg) {
   for ( uint8_t i = 0; i < msg.len; i++ ) {
     Serial.print(msg.buf[i], HEX); Serial.print(" ");
   } Serial.println();
-  CAN_message_t msg2;
+  /*CAN_message_t msg2;
   msg2.id =1;
   for ( uint8_t i = 0; i < 8; i++ ) msg2.buf[i] = 8;
   Can0.write(msg2);
+  */
 
 }
 
@@ -65,7 +84,7 @@ void loop() {
   if(star==2){
     i = 0;
     while(i<3){
-      for(uint8_t j = 0;j<=40;j++){
+      
       CAN_message_t msg1;
       msg1.id =1;
       for (uint8_t z = 0; z < 8; z++ ){
@@ -73,7 +92,8 @@ void loop() {
       }
       Can0.write(msg1);
       i=i+1;
-    }
+      
+    
       delay(1000);
     }
   }

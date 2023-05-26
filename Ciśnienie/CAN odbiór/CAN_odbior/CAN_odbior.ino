@@ -104,7 +104,7 @@ void loop() {
           }
       //Serial.println(tab[i].teta);
       //Serial.println(tab[i].x);  
-      delay(10);
+      delay(100);
       }
       Serial.println("Wykonałem pomiary");
       
@@ -113,6 +113,7 @@ void loop() {
 
   else if(odbior==2){
     Serial.println("Wysyłam");
+    
     //sending();
     
     /*
@@ -123,13 +124,14 @@ void loop() {
     } 
     */
     
-    
-    for(uint8_t i =0; i<=40; i++){
+    uint8_t czas = 0;
+
+    while(czas<2){
       uint32_t p;
       uint32_t timing;
       
-      p = tab[i].x;
-      timing = tab[i].teta;
+      p = tab[czas].x;
+      timing = tab[czas].teta;
       
       /*
       uint8_t pressure_count[4]={};
@@ -184,16 +186,17 @@ void loop() {
            
       }
       */
-    
+      msg5.seq=1;
       Can0.write(msg5);
       
-      Serial.print("wysłalem pomiar nr ");
-      Serial.println(i);
+      Serial.print("Wysłalem pomiar nr ");
+      Serial.println(czas);
       //Serial.print(p);
       //Serial.print(tab[i].x);
-
+      czas=czas+1;
       delay(1);
     }
+    odbior =5;
   }
   else{
 
