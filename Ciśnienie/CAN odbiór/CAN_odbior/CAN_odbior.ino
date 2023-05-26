@@ -1,5 +1,8 @@
 #include <HoneywellTruStabilitySPI.h>
 #include <FlexCAN_T4.h>
+#include <isotp.h>
+isotp<RX_BANKS_16, 512> tp; /* 16 slots for multi-ID support, at 512bytes buffer each payload rebuild */
+
 
 FlexCAN_T4<CAN1, RX_SIZE_256, TX_SIZE_16> Can0;
 
@@ -25,6 +28,7 @@ void setup(void) {
   Serial.begin(115200); delay(400);
   pinMode(6, OUTPUT); digitalWrite(6, LOW); /* optional tranceiver enable pin */
   Can0.begin();
+  Can0.setClock(CLK_60MHz);
   Can0.setBaudRate(1000000);
   Can0.setMaxMB(16);
   Can0.enableFIFO();
@@ -33,8 +37,24 @@ void setup(void) {
   //Can0.mailboxStatus();
   SPI.begin(); // start SPI communication
   sensor.begin(); // run sensor initialization
- 
+  tp.begin();
+  tp.setWriteBus(&Can0); /* we write to this bus */
+  tp.onReceive(myCallback); /* set callback */
   odbior = 5;
+}
+
+void myCallback(const ISOTP_data &config, const uint8_t *buf) {
+  /*Serial.print("ID: ");
+  Serial.print(config.id, HEX);
+  Serial.print("\tLEN: ");
+  Serial.print(config.len);
+  Serial.print("\tFINAL ARRAY: ");
+  for ( int i = 0; i < config.len; i++ ) {
+    Serial.print(buf[i], HEX);
+    Serial.print(" ");
+  } Serial.println();
+}
+  */
 }
 
 void canSniff(const CAN_message_t &msg) {
@@ -104,7 +124,7 @@ void loop() {
           }
       //Serial.println(tab[i].teta);
       //Serial.println(tab[i].x);  
-      delay(100);
+      
       }
       Serial.println("Wykonałem pomiary");
       
@@ -126,7 +146,7 @@ void loop() {
     
     uint8_t czas = 0;
 
-    while(czas<2){
+    while(czas<41){
       uint32_t p;
       uint32_t timing;
       
@@ -164,8 +184,9 @@ void loop() {
       t2 = ( (timing) >> 16 & 0xFF);
       t3 = ( (timing) >> 8 & 0xFF);
       t4 = ( (timing)  & 0xFF);
-      CAN_message_t msg5;
-      
+      /*CAN_message_t msg5;
+
+   
       msg5.id =5;
       msg5.buf[0]=p1;
       msg5.buf[1]=p2;
@@ -175,6 +196,7 @@ void loop() {
       msg5.buf[5]=t2;
       msg5.buf[6]=t3;
       msg5.buf[7]=t4;
+      */
 //Serial.println("zawartosc buf: " + p4 + msg5.buf[0] + msg5.buf[1] );
 //Serial.print(msg5.len);
       //for (uint8_t z = 0; z < 4; z++ ){
@@ -186,9 +208,19 @@ void loop() {
            
       }
       */
+      /*
       msg5.seq=1;
       Can0.write(msg5);
+      */
+      ISOTP_data config;
+      uint8_t buf[] ={p1, p2, p3, p4, t1, t2, t3, t4};
+      config.id = 0x666;
+      config.flags.extended = 0; /* standard frame */
+      config.separation_time = 10; /* time between back-to-back frames in millisec */
+      tp.write(config, buf, sizeof(buf));
+    
       
+
       Serial.print("Wysłalem pomiar nr ");
       Serial.println(czas);
       //Serial.print(p);
